@@ -22,9 +22,12 @@ int main(int argc, char** argv)
 
     QTreeView* treeView = new QTreeView;
     treeView->setModel(treeModel);
+    treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+    treeView->setDragDropMode(QAbstractItemView::DragDrop);
     treeView->setDragEnabled(true);
     treeView->setAcceptDrops(true);
     treeView->setDropIndicatorShown(true);
+
     window.setCentralWidget(treeView);
 
     QToolBar* toolbar = window.addToolBar("Add items to tree");

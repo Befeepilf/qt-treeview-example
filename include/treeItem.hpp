@@ -2,17 +2,21 @@
 #define TREE_ITEM_H
 
 #include <QIcon>
+#include <QMap>
 #include <QString>
 #include <QVariant>
 #include <QVector>
 
 enum TreeItemType {TreeItemGroup, TreeItemMesh, TreeItemCamera};
+extern QMap <TreeItemType, QString> treeItemMimes;
 
 class TreeItem
 {
     public:
         explicit TreeItem(QString name, TreeItemType type, QVector<QVariant> data = {}, TreeItem* parent = nullptr);
         ~TreeItem();
+
+        TreeItemType type(void) const;
 
         TreeItem* parent(void) const;
         void setParent(TreeItem* parent);

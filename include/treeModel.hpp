@@ -4,7 +4,11 @@
 #include "treeItem.hpp"
 
 #include <QAbstractItemModel>
+#include <QMap>
+#include <QMimeData>
 #include <QModelIndex>
+#include <QModelIndexList>
+#include <QStringList>
 #include <QVariant>
 
 class TreeModel : public QAbstractItemModel
@@ -12,7 +16,7 @@ class TreeModel : public QAbstractItemModel
     Q_OBJECT
     
     public:
-        TreeModel();
+        explicit TreeModel(QObject* parent = nullptr);
         ~TreeModel();
 
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -26,6 +30,7 @@ class TreeModel : public QAbstractItemModel
 
         QVariant data(const QModelIndex& index, int role) const override;
         bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+        bool setItemData(const QModelIndex& index, const QMap<int, QVariant>& roles) override;
 
         Qt::ItemFlags flags(const QModelIndex& index) const override;
 
@@ -41,6 +46,8 @@ class TreeModel : public QAbstractItemModel
 
         Qt::DropActions supportedDragActions(void) const;
         Qt::DropActions supportedDropActions(void) const;
+        QStringList mimeTypes(void) const override;
+        QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     private:
         TreeItem* rootItem;
