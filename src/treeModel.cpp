@@ -366,7 +366,7 @@ TreeItem* TreeModel::mimeDataToTreeItem(const QMimeData* mimeData)
     QMap<TreeItemType, QString>::const_iterator it = treeItemMimes.constBegin();
     auto end = treeItemMimes.constEnd();
     while (it != end) {
-        if (formats.contains(treeItemMimes[TreeItemGroup]))
+        if (formats.contains(it.value()))
         {
             encodedData = mimeData->data(it.value());
             itemType = it.key();
