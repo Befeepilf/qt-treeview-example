@@ -300,36 +300,101 @@ Qt::DropActions TreeModel::supportedDropActions(void) const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
+
 QStringList TreeModel::mimeTypes(void) const
 {
-    return treeItemMimes.values();
+    return QStringList(treeItemMimes.values());
 }
 
 QMimeData* TreeModel::mimeData(const QModelIndexList& indexes) const
 {
-    if (indexes.empty() || mimeTypes().empty())
+    if (indexes.empty())
         return nullptr;
 
-    TreeItem* parentItem;
-
-    if (!indexes.first().isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<TreeItem*>(indexes.first().internalPointer());
-
-    TreeItem* childItem = parentItem->child(indexes.first().row());
-
-    if (childItem == nullptr)
-        return nullptr;
-
-    QByteArray encodedData = {};
-    for (int i = 0; i < childItem->columnCount(); i++)
-    {
-        encodedData.push_back(childItem->data(i, Qt::DisplayRole).toByteArray());
-    }
+    // since the selection mode is SingleSelection all indexes refer to different columns of the same row
+    TreeItem* childItem = static_cast<TreeItem*>(indexes[0].internalPointer());
 
     QMimeData* mimeData = new QMimeData;
+    QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+    for (const QModelIndex& index : indexes)
+    {
+        if (index.isValid())
+        {
+            stream << data(index, Qt::DisplayRole).toString();
+        }
+    }
+
     mimeData->setData(treeItemMimes[childItem->type()], encodedData);
 
     return mimeData;
+}
+
+bool TreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    if (row == -1 && column == -1)
+    {
+        // item was dropped directly on a parent item
+        row = 0;
+        column = 0;
+    }
+
+    TreeItem* childItem = mimeDataToTreeItem(data);
+
+    if (childItem == nullptr)
+        return false;
+
+    if (action == Qt::CopyAction)
+    {
+        insertRows(row, 1, parent);
+        setRow(row, childItem, parent);
+        return true;
+    }
+
+    return false;
+}
+
+TreeItem* TreeModel::mimeDataToTreeItem(const QMimeData* mimeData)
+{
+    QStringList formats = mimeData->formats();
+
+    QByteArray encodedData;
+    TreeItemType itemType;
+
+    // find out whether mimeData has a supported mime type
+    QMap<TreeItemType, QString>::const_iterator it = treeItemMimes.constBegin();
+    auto end = treeItemMimes.constEnd();
+    while (it != end) {
+        if (formats.contains(treeItemMimes[TreeItemGroup]))
+        {
+            encodedData = mimeData->data(it.value());
+            itemType = it.key();
+            break;
+        }
+
+        ++it;
+    }
+
+    if (!itemType)
+        return nullptr;
+
+    QDataStream stream (&encodedData, QIODevice::ReadOnly);
+    QVector<QVariant> decodedData;
+    QString name;
+    int i = 0;
+    while (!stream.atEnd())
+    {
+        QString item;
+        stream >> item;
+
+        if (i == 0)
+            name = item;
+        else
+            decodedData << item;
+        
+        i++;
+    }
+
+    return new TreeItem(name, itemType, decodedData);
 }

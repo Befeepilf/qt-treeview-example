@@ -150,7 +150,9 @@ bool TreeItem::setChild(int row, TreeItem* child)
     if (row < 0 || row >= childrenCount())
         return false;
 
+    child->setParent(this);
     m_children[row] = child;
+    
     return true;
 }
 

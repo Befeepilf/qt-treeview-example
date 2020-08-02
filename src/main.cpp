@@ -23,9 +23,10 @@ int main(int argc, char** argv)
     QTreeView* treeView = new QTreeView;
     treeView->setModel(treeModel);
     treeView->setSelectionMode(QAbstractItemView::SingleSelection);
-    treeView->setDragDropMode(QAbstractItemView::DragDrop);
-    treeView->setDragEnabled(true);
+    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    treeView->setDragEnabled(false);
     treeView->setAcceptDrops(true);
+    treeView->setDragDropMode(QAbstractItemView::DragDrop);
     treeView->setDropIndicatorShown(true);
 
     window.setCentralWidget(treeView);

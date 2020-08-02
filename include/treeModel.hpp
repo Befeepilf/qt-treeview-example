@@ -46,8 +46,11 @@ class TreeModel : public QAbstractItemModel
 
         Qt::DropActions supportedDragActions(void) const;
         Qt::DropActions supportedDropActions(void) const;
+
         QStringList mimeTypes(void) const override;
         QMimeData* mimeData(const QModelIndexList& indexes) const override;
+        bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent = QModelIndex()) override;
+        TreeItem* mimeDataToTreeItem(const QMimeData* mimeData);
 
     private:
         TreeItem* rootItem;
