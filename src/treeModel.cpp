@@ -345,7 +345,7 @@ bool TreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     if (childItem == nullptr)
         return false;
 
-    if (action == Qt::CopyAction)
+    if (action == Qt::CopyAction || action == Qt::MoveAction)
     {
         insertRows(row, 1, parent);
         setRow(row, childItem, parent);

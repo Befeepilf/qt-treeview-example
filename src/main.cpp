@@ -26,6 +26,7 @@ int main(int argc, char** argv)
     treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView->setDragEnabled(false);
     treeView->setAcceptDrops(true);
+    treeView->setDefaultDropAction(Qt::MoveAction);
     treeView->setDragDropMode(QAbstractItemView::DragDrop);
     treeView->setDropIndicatorShown(true);
 
