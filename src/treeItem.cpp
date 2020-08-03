@@ -1,9 +1,19 @@
 #include "treeItem.hpp"
 
 #include <QIcon>
+#include <QMap>
 #include <QString>
 #include <QVariant>
 #include <QVector>
+
+#include <iostream>
+
+
+QMap <TreeItemType, QString> treeItemMimes {
+    {TreeItemGroup, "application/vnd.crevis.scene.group"},
+    {TreeItemMesh, "application/vnd.crevis.scene.mesh"},
+    {TreeItemCamera, "application/vnd.crevis.scene.camera"}
+};
 
 
 TreeItem::TreeItem(QString name, TreeItemType type, QVector<QVariant> data, TreeItem* parent) : m_name(name), m_type(type), m_data(data), m_parent(parent), m_children({})
@@ -16,6 +26,11 @@ TreeItem::~TreeItem()
     qDeleteAll(m_children);
 }
 
+
+TreeItemType TreeItem::type(void) const
+{
+    return m_type;
+}
 
 QIcon TreeItem::icon(void) const
 {
@@ -89,11 +104,16 @@ QVariant TreeItem::data(int column, int role) const
 
 Qt::ItemFlags TreeItem::dataFlags(int column) const
 {
-    Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled;
+    Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
+
+    if (m_type != TreeItemGroup)
+        defaultFlags |= Qt::ItemNeverHasChildren;
+    else
+        defaultFlags |= Qt::ItemIsDropEnabled;
 
     if (column == 0)
         return Qt::ItemIsEditable | defaultFlags;
-    return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+    return Qt::ItemNeverHasChildren | defaultFlags;
 }
 
 bool TreeItem::setData(int column, int role, const QVariant& value)
@@ -130,7 +150,9 @@ bool TreeItem::setChild(int row, TreeItem* child)
     if (row < 0 || row >= childrenCount())
         return false;
 
+    child->setParent(this);
     m_children[row] = child;
+    
     return true;
 }
 
