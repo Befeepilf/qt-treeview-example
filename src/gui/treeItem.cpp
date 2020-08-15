@@ -1,4 +1,4 @@
-#include "treeItem.hpp"
+#include "gui/treeItem.hpp"
 
 #include <QIcon>
 #include <QMap>
@@ -11,6 +11,7 @@
 
 QMap <TreeItemType, QString> treeItemMimes {
     {TreeItemGroup, "application/vnd.crevis.scene.group"},
+    {TreeItemMesh, "application/vnd.crevis.scene.light"},
     {TreeItemMesh, "application/vnd.crevis.scene.mesh"},
     {TreeItemCamera, "application/vnd.crevis.scene.camera"}
 };

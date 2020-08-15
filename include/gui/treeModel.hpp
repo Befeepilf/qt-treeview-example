@@ -1,7 +1,9 @@
 #ifndef TREE_MODEL_H
 #define TREE_MODEL_H
 
-#include "treeItem.hpp"
+#include "store.hpp"
+#include "gui/treeItem.hpp"
+#include "scene/itemVariant.hpp"
 
 #include <QAbstractItemModel>
 #include <QMap>
@@ -11,6 +13,8 @@
 #include <QStringList>
 #include <QVariant>
 
+#include <vector>
+
 class TreeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -18,6 +22,9 @@ class TreeModel : public QAbstractItemModel
     public:
         explicit TreeModel(QObject* parent = nullptr);
         ~TreeModel();
+
+        void update(store::model state);
+        void parseSceneTree(TreeItem* parentItem, std::vector<Scene::ItemVariant> sceneTree);
 
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
         int columnCount(const QModelIndex& parent = QModelIndex()) const override;

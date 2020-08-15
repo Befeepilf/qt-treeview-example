@@ -1,36 +1,73 @@
-#include "treeItem.hpp"
-#include "treeModel.hpp"
+#include "store.hpp"
+#include "gui/treeItem.hpp"
+#include "gui/treeModel.hpp"
+#include "scene/itemVariant.hpp"
 
 #include <QByteArray>
 #include <QMap>
 #include <QMimeData>
 #include <QModelIndex>
 #include <QModelIndexList>
+#include <QString>
 #include <QStringList>
 #include <QVariant>
 
 #include <iostream>
+#include <variant>
 
+template<class... Ts> struct overloaded : Ts... {using Ts::operator()...;};
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 TreeModel::TreeModel(QObject* parent) : QAbstractItemModel(parent)
 {
     rootItem = new TreeItem("Name", TreeItemGroup, {"Test1", "Test2"});
-
-    TreeItem* a = new TreeItem("A", TreeItemGroup, {"Item", 1});
-    TreeItem* b = new TreeItem("B", TreeItemMesh, {"Item", 2});
-    TreeItem* c = new TreeItem("C", TreeItemGroup, {"Item", 3});
-    TreeItem* d = new TreeItem("D", TreeItemCamera, {"Item", 4});
-
-    a->appendChild(b);
-    c->appendChild(d);
-
-    rootItem->appendChild(a);
-    rootItem->appendChild(c);
 }
 
 TreeModel::~TreeModel()
 {
     delete rootItem;
+}
+
+
+void TreeModel::update(store::model state)
+{
+    emit layoutAboutToBeChanged();
+    std::cout << "update model" << std::endl;
+
+    delete rootItem;
+
+    rootItem = new TreeItem("Name", TreeItemGroup, {"Test1", "Test2"});
+    parseSceneTree(rootItem, state.sceneTree);
+
+    emit layoutChanged();
+}
+
+void TreeModel::parseSceneTree(TreeItem* parentItem, std::vector<Scene::ItemVariant> sceneTree)
+{
+    std::cout << "parse" << std::endl;
+
+    for (Scene::ItemVariant item : sceneTree)
+    {
+        std::visit(overloaded {
+            [&](Scene::Group group) {
+                TreeItem* newGroup = new TreeItem(QString::fromStdString(group.name), TreeItemGroup);
+                parentItem->appendChild(newGroup);
+                parseSceneTree(newGroup, group.children);
+            },
+            [&](Scene::Mesh* mesh) {
+                TreeItem* newChild = new TreeItem(QString::fromStdString(mesh->name()), TreeItemMesh);
+                parentItem->appendChild(newChild);
+            },
+            [&](Scene::Camera* camera) {
+                TreeItem* newChild = new TreeItem(QString::fromStdString(camera->name()), TreeItemCamera);
+                parentItem->appendChild(newChild);
+            },
+            [&](Scene::Light* light) {
+                TreeItem* newChild = new TreeItem(QString::fromStdString(light->name()), TreeItemLight);
+                parentItem->appendChild(newChild);
+            }
+        }, item);
+    }
 }
 
 

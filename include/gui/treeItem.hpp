@@ -7,7 +7,7 @@
 #include <QVariant>
 #include <QVector>
 
-enum TreeItemType {TreeItemGroup, TreeItemMesh, TreeItemCamera};
+enum TreeItemType {TreeItemGroup, TreeItemLight, TreeItemMesh, TreeItemCamera};
 extern QMap <TreeItemType, QString> treeItemMimes;
 
 class TreeItem
